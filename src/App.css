@@ -1,0 +1,17 @@
+.app-container {
+  color: #333333;
+  min-height: 100vh;
+  background-color: white;
+  font-family: 'Arial', 'Helvetica', sans-serif;
+}
+
+/* Global typography improvements */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Arial', 'Helvetica', sans-serif;
+}
+
+/* Increase base font size for better readability */
+body {
+  font-size: 16px;
+  line-height: 1.5;
+}
