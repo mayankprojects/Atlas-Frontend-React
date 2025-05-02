@@ -2,16 +2,25 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AtlasService from '../service/AtlasService';
 
-const AtlasList = () => {
+const UserAtlasList = () => {
   const [loading, setLoading] = useState(true);
   const [atlases, setAtlases] = useState([]);
+  const [enrolledClasses, setEnrolledClasses] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
+        // Get all classes
         const response = await AtlasService.getAtlasList();
         setAtlases(response.data);
+        
+        // Get enrolled classes from local storage
+        const storedEnrollments = localStorage.getItem('enrolledClasses');
+        if (storedEnrollments) {
+          setEnrolledClasses(JSON.parse(storedEnrollments));
+        }
       } catch(error) {
         console.log(error);
       }
@@ -20,37 +29,19 @@ const AtlasList = () => {
     fetchData();
   }, []);
 
-  const deleteAtlas = (e, id) => {
+  const enrollClass = (e, id) => {
     e.preventDefault();
-    AtlasService.deleteAtlas(id)
-      .then(() => {
-        setAtlases(atlases.filter(atlas => atlas.id !== id));
-      })
-      .catch(error => {
-        console.log(error);
-      });
+    navigate(`/enrollClass/${id}`);
   };
 
-  const editAtlas = (e, id) => {
-    e.preventDefault();
-    navigate(`/editAtlas/${id}`);
+  const isEnrolled = (id) => {
+    return enrolledClasses.includes(id);
   };
-
-  const navigate = useNavigate();
 
   return (
     <div className="flex flex-col items-center max-w-5xl mx-auto my-8 px-4">
-      <h1 className="text-3xl font-bold text-red-600 mb-8">AHA Available Classes (Admin View)</h1>
+      <h1 className="text-3xl font-bold text-red-600 mb-8">AHA Available Classes</h1>
       
-      <div className="w-full mb-8 text-center">
-        <button
-          onClick={() => navigate("/addAtlas")}
-          className="bg-red-500 hover:bg-red-700 text-white font-semibold px-8 py-3 rounded-md shadow text-lg"
-        >
-          Add Class 📚
-        </button>
-      </div>
-
       <div className="overflow-x-auto bg-white rounded-lg shadow w-full">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-red-500">
@@ -76,19 +67,19 @@ const AtlasList = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-gray-800 text-base">{atlas.instructor_name}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-gray-800 text-base">{atlas.discipline}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-gray-800 text-base">{atlas.location}</td>
-                  <td className="px-6 py-4 whitespace-nowrap space-x-6">
-                    <button
-                      onClick={(e) => editAtlas(e, atlas.id)}
-                      className="text-green-600 hover:text-green-900 hover:underline text-base font-medium"
-                    >
-                      Edit 📝
-                    </button>
-                    <button
-                      onClick={(e) => deleteAtlas(e, atlas.id)}
-                      className="text-red-600 hover:text-red-900 hover:underline text-base font-medium"
-                    >
-                      Delete 🗑️
-                    </button>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {isEnrolled(atlas.id) ? (
+                      <span className="px-4 py-2 bg-green-100 text-green-800 rounded-md font-medium">
+                        Enrolled ✓
+                      </span>
+                    ) : (
+                      <button
+                        onClick={(e) => enrollClass(e, atlas.id)}
+                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md font-medium"
+                      >
+                        Enroll Now
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -100,4 +91,4 @@ const AtlasList = () => {
   );
 };
 
-export default AtlasList;   
+export default UserAtlasList;

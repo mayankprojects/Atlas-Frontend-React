@@ -1,8 +1,6 @@
-// Login.js
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
 import abc from "../images/ahalogo.png"
 
 function Login({ onLoginSuccess }) {
@@ -16,6 +14,15 @@ function Login({ onLoginSuccess }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         
+        // Admin hardcoded login check
+        if (userId === "admin@atlas.com" && password === "admin123") {
+            // Set admin role in localStorage
+            localStorage.setItem('userRole', 'admin');
+            onLoginSuccess('admin');
+            navigate("/");
+            return;
+        }
+        
         const data = {
             "userId": userId,
             "password": password
@@ -24,7 +31,9 @@ function Login({ onLoginSuccess }) {
         try {
             const response = await axios.post("http://localhost:9090/loginUser", data);
             if(response.data) {
-                onLoginSuccess();
+                // Set regular user role in localStorage
+                localStorage.setItem('userRole', 'user');
+                onLoginSuccess('user');
                 navigate("/");
             } else {
                 setError("Invalid User Id or Password");
